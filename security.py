@@ -2,6 +2,7 @@ import face_recognition
 import cv2
 import numpy as np
 import os
+import time
 
 video_capture = cv2.VideoCapture(0)
 
@@ -25,6 +26,8 @@ for img in files:
     is_file_img = True
 
 while is_file_img:
+    start_time = time.time()
+
     ret, frame = video_capture.read()
 
     if peopleSearch:
@@ -63,18 +66,15 @@ while is_file_img:
             else:
                 progressBar = progressBar - 10
 
-
-            if progressBar >= 100:
+            if progressBar >= 110:
                 progressBar = 0
                 peopleSearch = False
                 _is_open = True
 
-
-            elif progressBar <= -50:
+            elif progressBar <= -60:
                 progressBar = 0
                 peopleSearch = False
                 _is_open = False
-
 
     if not peopleSearch:
         delay = delay - 1
@@ -91,8 +91,12 @@ while is_file_img:
         else:
             print('DELAY: ' + str(delay))
 
-
     print('progressBar: ' + str(progressBar))
+    font = cv2.FONT_HERSHEY_DUPLEX
+    FPS = int(1.0 / (time.time() - start_time))
+    cv2.putText(frame, 'FPS :' + str(FPS), (10, 65), font, 1.0, (0, 0, 255), 5)
+    cv2.putText(frame, 'progressBar :' + str(progressBar) + '%', (10, 100), font, 1.0, (0, 0, 255), 5)
+
     cv2.imshow('Video', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
