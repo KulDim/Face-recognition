@@ -8,45 +8,56 @@ from modulus.FPS import FPS; FPS = FPS(); SEVE_FPS = int()
 video_capture = cv2.VideoCapture(0)
 
 
-known_face_encodings = []
-known_face_names = []
 
+# Settings
 INT_DELAY_TIME = 30
 progressBar = 0
 peopleSearch = True
 delay = INT_DELAY_TIME
 _is_open = bool
 
-is_file_img = False
-directory = 'face/'
-files = os.listdir(directory)
 
-for img in files:
-    (name, type) = img.split('.')
-    face_encoding = face_recognition.face_encodings(face_recognition.load_image_file(directory + img))[0]
-    known_face_encodings.append(face_encoding)
-    known_face_names.append(name)
-    is_file_img = True
+known_face_encodings = []
+known_face_names = []
 
-while is_file_img:
+
+def getPictures(directory):
+    check = False
+    files = os.listdir(directory)
+    for img in files:
+        (name, _) = img.split('.')
+        face_encoding = face_recognition.face_encodings(face_recognition.load_image_file(directory + img))[0]
+        known_face_encodings.append(face_encoding)
+        known_face_names.append(name)
+        check = True
+    return check
+
+
+openFileImg = getPictures('face/')
+
+while openFileImg:
     ret, frame = video_capture.read()
-
     if peopleSearch:
         rgb_frame = frame[:, :, ::-1]
         face_locations = face_recognition.face_locations(rgb_frame)
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
             name = "Unknown"
-
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
             if True in matches:
                 first_match_index = matches.index(True)
                 name = known_face_names[first_match_index]
-
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
+
+
+
+
+
+
+
 
             if True in matches:
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
@@ -111,5 +122,3 @@ video_capture.release()
 cv2.destroyAllWindows()
 
 
-if(not is_file_img):
-    print('Not face/file << RUN >> "add_face.py"')
