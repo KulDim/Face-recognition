@@ -2,24 +2,20 @@ import face_recognition
 import cv2
 import numpy as np
 import os
-
-from numpy.lib.shape_base import tile
-
-from modulus.FPS import FPS; FPS = FPS(); SEVE_FPS = int()
-
-video_capture = cv2.VideoCapture(0)
+from modulus.FPS import FPS; FPS = FPS()
 
 # Settings
-DELAY = INT_DELAY_TIME = 30
-IS_OPEN = bool
+video_capture = cv2.VideoCapture(0)
+faceCascade = cv2.CascadeClassifier("data/haarcascade_frontalface_default.xml")
+font = cv2.FONT_HERSHEY_DUPLEX
+known_face_names = []
+known_face_encodings = []
 progressBar = 0
 peopleSearch = False
 peopleFase = True
-
-font = cv2.FONT_HERSHEY_DUPLEX
-known_face_encodings = []
-known_face_names = []
-faceCascade = cv2.CascadeClassifier("data/haarcascade_frontalface_default.xml")
+SEVE_FPS = int()
+IS_OPEN = bool
+DELAY = INT_DELAY_TIME = 100
 
 def getPictures(directory):
     check = False
@@ -53,6 +49,7 @@ while openFileImg:
         rgb_frame = frame[:, :, ::-1]
         face_locations = face_recognition.face_locations(rgb_frame)
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             name = "Unknown"
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
