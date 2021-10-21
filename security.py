@@ -2,9 +2,11 @@ import face_recognition
 import cv2
 import numpy as np
 import os
-import time
+
+from modulus.FPS import FPS; FPS = FPS(); SEVE_FPS = int()
 
 video_capture = cv2.VideoCapture(0)
+
 
 known_face_encodings = []
 known_face_names = []
@@ -18,6 +20,7 @@ _is_open = bool
 is_file_img = False
 directory = 'face/'
 files = os.listdir(directory)
+
 for img in files:
     (name, type) = img.split('.')
     face_encoding = face_recognition.face_encodings(face_recognition.load_image_file(directory + img))[0]
@@ -26,8 +29,6 @@ for img in files:
     is_file_img = True
 
 while is_file_img:
-    start_time = time.time()
-
     ret, frame = video_capture.read()
 
     if peopleSearch:
@@ -93,8 +94,13 @@ while is_file_img:
 
     print('progressBar: ' + str(progressBar))
     font = cv2.FONT_HERSHEY_DUPLEX
-    FPS = int(1.0 / (time.time() - start_time))
-    cv2.putText(frame, 'FPS :' + str(FPS), (10, 65), font, 1.0, (0, 0, 255), 5)
+
+    # Frames per second
+    counter = FPS.frameСounter()
+    if counter != None: SEVE_FPS = counter
+
+    cv2.putText(frame, 'FPS: ' + str(int(SEVE_FPS)), (10, 65), font, 1.0, (0, 0, 255), 5)
+
     cv2.putText(frame, 'progressBar :' + str(progressBar) + '%', (10, 100), font, 1.0, (0, 0, 255), 5)
 
     cv2.imshow('Video', frame)
