@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 import os
 
+from numpy.lib.shape_base import tile
+
 from modulus.FPS import FPS; FPS = FPS(); SEVE_FPS = int()
 
 video_capture = cv2.VideoCapture(0)
@@ -11,11 +13,13 @@ video_capture = cv2.VideoCapture(0)
 DELAY = INT_DELAY_TIME = 30
 IS_OPEN = bool
 progressBar = 0
-peopleSearch = True
+peopleSearch = False
+peopleFase = True
 
 font = cv2.FONT_HERSHEY_DUPLEX
 known_face_encodings = []
 known_face_names = []
+faceCascade = cv2.CascadeClassifier("data/haarcascade_frontalface_default.xml")
 
 def getPictures(directory):
     check = False
@@ -32,7 +36,20 @@ openFileImg = getPictures('face/')
 
 while openFileImg:
     ret, frame = video_capture.read()
-    if peopleSearch:
+
+    if  peopleFase:
+        faces = faceCascade.detectMultiScale(
+            cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY),
+            scaleFactor = 1.5,
+            minNeighbors = 6, 
+            minSize = (30, 30)
+        )
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            peopleSearch = True
+            peopleFase = False
+
+    if  peopleSearch:
         rgb_frame = frame[:, :, ::-1]
         face_locations = face_recognition.face_locations(rgb_frame)
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
@@ -68,16 +85,16 @@ while openFileImg:
                 IS_OPEN = False
 
     # DELAY OPEN OR NOT OPEN
-    if not peopleSearch:
-        DELAY = (DELAY - 1)
-
-        if IS_OPEN: cv2.putText(frame, 'OPEN THE DOOR', (10, 30), font, 1.0, (0, 255, 0), 5)
-        else: cv2.putText(frame, 'GO AWAY', (10, 30), font, 1.0, (0, 0, 255), 5)
-
-        if(DELAY <= 0):
-            DELAY = INT_DELAY_TIME
-            peopleSearch = True
-        else: cv2.putText(frame, 'DELAY: ' + str(DELAY), (10, 140), font, 1.0, (0, 0, 255), 5)
+    if not peopleFase:
+        if not peopleSearch:
+            DELAY = (DELAY - 1)
+            if IS_OPEN: cv2.putText(frame, 'OPEN THE DOOR', (10, 30), font, 1.0, (0, 255, 0), 5)
+            else: cv2.putText(frame, 'GO AWAY', (10, 30), font, 1.0, (0, 0, 255), 5)
+            if(DELAY <= 0):
+                DELAY = INT_DELAY_TIME
+                peopleFase = True
+                peopleSearch = False
+            else: cv2.putText(frame, 'DELAY: ' + str(DELAY), (10, 140), font, 1.0, (0, 0, 255), 5)
 
     # Frames per second
     counter = FPS.frameСounter()
