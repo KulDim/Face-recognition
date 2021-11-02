@@ -16,7 +16,7 @@ peopleFase = True
 SEVE_FPS = int()
 IS_OPEN = bool
 DELAY = INT_DELAY_TIME = 100
-
+# Загрузка фото... функция
 def getPictures(directory):
     check = False
     files = os.listdir(directory)
@@ -27,12 +27,12 @@ def getPictures(directory):
         known_face_names.append(name)
         check = True
     return check
-
+# Вызов функцию загруззки фото
 openFileImg = getPictures('face/')
-
+# Провека в цикле если функция вернула правду то выполнять иначе нет
 while openFileImg:
     ret, frame = video_capture.read()
-
+# Провека есть ли лицо на камере с помашью каскады хаара если есть то проверять будить в базе лиц
     if  peopleFase:
         faces = faceCascade.detectMultiScale(
             cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY),
@@ -44,12 +44,12 @@ while openFileImg:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             peopleSearch = True
             peopleFase = False
-
+# проверка лиц
     if  peopleSearch:
         rgb_frame = frame[:, :, ::-1]
         face_locations = face_recognition.face_locations(rgb_frame)
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
-
+# нахождения лиц 
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             name = "Unknown"
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
@@ -71,7 +71,7 @@ while openFileImg:
                 progressBar = (progressBar - 10)
 
             cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-
+# прогрес бар
             if progressBar >= 100 + 10: 
                 progressBar = 0
                 peopleSearch = False
